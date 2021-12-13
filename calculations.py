@@ -52,7 +52,7 @@ def rates_without_COVID(rates: list[float]) -> list[float]:
     """
 
     rate2020 = average_unemployment_rate(rates)
-    rate2021 = (sum(rates) + rate2020) / (len(rates) + 1)
+    rate2021 = (sum(rates) + rate2020 - rates[0]) / (len(rates))
 
     return [rate2020, rate2021]
 
