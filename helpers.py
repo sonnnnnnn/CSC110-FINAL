@@ -122,6 +122,9 @@ class JobMarket:
     country_name: str
     rates: Rates
     industries: list[Industry]
+    most_impacted_industries: list[int]
+    highest_rp: list[int]
+    highest_rwp: list[int]
 
     def __init__(self, name: str, rates: Rates, industries: list[Industry]) -> None:
         """Initialize a new country's job market/unemployment statistics object
@@ -131,6 +134,9 @@ class JobMarket:
 
         self.rates = rates
         self.industries = industries
+        self.most_impacted_industries = []
+        self.highest_rp = []
+        self.highest_rwp = []
 
     def get_industry(self, name: str) -> Industry:
         """Return the Industry object corresponding to the name passed in.
@@ -141,9 +147,63 @@ class JobMarket:
             if index == industry.name:
                 return industry
 
-    def rates_range(self) -> list[float]:
-        """"""
-        return []
+    def rates_in_range(self, industry_names: list[str], years: list[int]) -> list[list[float]]:
+        """Return the unemployment rates (reported and predicted) of the industries over the years selected.
+
+        """
+        industries = [self.get_industry(industry) for industry in industry_names]
+        list_so_far = []
+
+        for industry in industries:
+            temp_list = [industry.rates.unemployment_rates[i] for i in range(0, len(years))]
+            if len(years) > len(industry.rates.unemployment_rates):
+                temp_list.extend([industry.rates.predicted_rates[i] for i in range(0, len(years) - len(
+                    industry.rates.unemployment_rates))])
+            list_so_far.append(temp_list)
+
+        return [[]]
+
+    def most_impacted_industries(self, amount: int) -> list[Industry]:
+        """Return the top # (based on amount sent in) most impacted (by COVID-19) industries."""
+        max = 0
+
+        if self.most_impacted_industries == []:
+            for i in range(0, len(self.industries)):
+                max = i
+                for j in range(i, len(self.industries)):
+                    if self.industries[j].impact > self.industries[max].impact:
+                        max = j
+                self.most_impacted_industries.append(max)
+
+        return [self.industries[self.most_impacted_industries[i]] for i in range(0, amount)]
+
+    def top_rps_score(self, amount: int) -> list[Industry]:
+        """Return # (based on amount sent in) industries with the highest recovery potential."""
+        max = 0
+
+        if self.highest_rp == []:
+            for i in range(0, len(self.industries)):
+                max = i
+                for j in range(i, len(self.industries)):
+                    if self.industries[j].recovery_potential > self.industries[max].recovery_potential:
+                        max = j
+                self.highest_rp.append(max)
+
+        return [self.industries[self.highest_rp[i]] for i in range(0, amount)]
+
+    def top_rwps_score(self, amount: int) -> list[Industry]:
+        """Return # (based on amount sent in) industries with the highest remote work potential."""
+        max = 0
+
+        if self.highest_rwp == []:
+            for i in range(0, len(self.industries)):
+                max = i
+                for j in range(i, len(self.industries)):
+                    if self.industries[j].potential_remote_work > self.industries[max].potential_remote_work:
+                        max = j
+                self.highest_rwp.append(max)
+
+        return [self.industries[self.highest_rwp[i]] for i in range(0, amount)]
 
 
 # Helper functions
