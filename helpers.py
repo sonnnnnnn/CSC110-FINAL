@@ -147,6 +147,18 @@ class JobMarket:
             if index == industry.name:
                 return industry
 
+    def get_rates(self, industry_names: list[str]) -> list[list[float]]:
+        """Return the unemployment rates (reported and predicted) of the industries selected.
+
+        """
+        industries = [self.get_industry(industry) for industry in industry_names]
+        list_so_far = []
+
+        for industry in industries:
+            list_so_far.append(industry.rates.unemployment_rates + industry.rates.predicted_rates)
+
+        return list_so_far
+
     def rates_in_range(self, industry_names: list[str], years: list[int]) -> list[list[float]]:
         """Return the unemployment rates (reported and predicted) of the industries over the years selected.
 
@@ -161,7 +173,7 @@ class JobMarket:
                     industry.rates.unemployment_rates))])
             list_so_far.append(temp_list)
 
-        return [[]]
+        return list_so_far
 
     def most_impacted_industries(self, amount: int) -> list[Industry]:
         """Return the top # (based on amount sent in) most impacted (by COVID-19) industries."""
