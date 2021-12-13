@@ -57,7 +57,7 @@ def rates_without_COVID(rates: list[float]) -> list[float]:
     return [rate2020, rate2021]
 
 
-def predicted_rates(rates: dict[int, float]) -> list[float]:
+def predicted_rates(rates: list[float]) -> list[float]:
     """ Return the predicted unemployment rate between 2022 and 2024 based on
     unemployment rate data between 2017 and 2021.
 
