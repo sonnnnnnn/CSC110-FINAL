@@ -103,50 +103,38 @@ def read_data() -> JobMarket:
     industries = read_industry_data(filenames[1])
     return JobMarket('Canada', country_data, industries)
 
-def read_national_data(filename: str) -> helpers.Rates:
+def read_national_data() -> list[list]:
     """Return the data stored in the given file.
 
     The file is a CSV file with two columns, one columns gives the month and year while the other gives the unemployment
     rate. These files are based on real  data from the Canadian Government.
     """
-    # ACCUMULATOR data_output: The Unemployment parsed from file so far
-    data_output = []
-    with open('unemployment_rate.csv') as file:
-        reader = csv.reader(file)
 
-        # Skip header row
-        next(reader)
-        data = [row for row in reader if len(row) == 2]  # Length of each row is 2 ; Skips last row
-        # for row in data:
-        # data_output += [Unemployment(row[0], float(row[1]))]
-        for row in data:
-            row[1] = float(row[1])
-    # return data
-    return data
+    rates = [6.4, 5.5, 5.2, 5.5, 8, 5.6]
+    national_data = Rates(unemployment_rates=rates, predicted_rates=predicted_rates(rates),
+                          rates_without_COVID=rates_without_COVID(rates))
+    return [rates, predicted_rates(rates), rates_without_COVID(rates)]
 
 
-def read_industry_data() -> list[helpers.Industry]:
+def read_industry_data() -> list[list]:
     """Return the data stored in the given file.
 
-    The file is a CSV file with two columns, one columns gives the month and year while the other gives the unemployment
-    rate. These files are based on real  data from the Canadian Government.
+    The file is a CSV file with seven columns, one columns gives industries while the other six give the number of
+    employment between 2016 and 2021. These files are based on real data from the Canadian Government.
     """
-    # ACCUMULATOR data_output: The Unemployment parsed from file so far
-    data_output = []
-    with open('unemployment_industry.csv') as file:
-        reader = csv.reader(file)
 
-        # Skip header row
-        next(reader)
-        data = [row for row in reader if len(row) == 7]  # Length of each row is 7 ; Skips last row
-        # for row in data:
-        # data_output += [Unemployment(row[0], float(row[1]))]
-        for row in data:
-            row[1] = float(row[1])
-            row[2] = float(row[2])
-            row[3] = float(row[3])
-            row[4] = float(row[4])
-            row[5] = float(row[5])
-            row[6] = float(row[6])
-    #return data
-    return data
+    unemployment_csv = csv.reader(open("unemployment_industry.csv"))
+    header = unemployment_csv.next()
+    data = []
+    for row in unemployment_csv:
+        data.append(row)
+
+    data = np.array(data)
+
+    for i in range(len(data)):
+        rates = [data[i][1], data[i][2], data[i][3], data[i][4], data[i][5], data[i][6]]
+        data[i][0] = Rates(unemployment_rates=rates, predicted_rates=predicted_rates(rates),
+                           rates_without_COVID=rates_without_COVID(rates))
+
+    return [data[i] for i in range(len(data))]
+
