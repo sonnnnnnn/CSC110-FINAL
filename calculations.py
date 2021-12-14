@@ -122,7 +122,7 @@ def read_national_data(filename: str) -> helpers.Rates:
         for row in data:
             row[1] = float(row[1])
     # return data
-    return helpers.Rates([], [], [])
+    return data
 
 
 def read_industry_data() -> list[helpers.Industry]:
@@ -149,4 +149,4 @@ def read_industry_data() -> list[helpers.Industry]:
             row[5] = float(row[5])
             row[6] = float(row[6])
     #return data
-    return []
+    return data
