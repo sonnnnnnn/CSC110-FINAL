@@ -1,0 +1,10 @@
+We have installed the following libraries:
+numpy
+csv
+dataclasses
+pandas
+plotly
+plotly express
+
+
+
