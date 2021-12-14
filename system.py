@@ -94,6 +94,7 @@ class JobMarket:
     rates: Rates
     industries: list[Industry]
     sorted_by_impact: list[int]
+    impact_groups: set[int]
 
     def __init__(self, name: str, rates: Rates, industries: list[Industry]) -> None:
         """Initialize a new country's job market/unemployment statistics object
@@ -104,6 +105,7 @@ class JobMarket:
         self.rates = rates
         self.industries = industries
         self.sorted_by_impact = []
+        self.impact_groups = set()
 
     def get_industry(self, name: str) -> Industry:
         """Return the Industry object corresponding to the name passed in.
