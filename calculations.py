@@ -53,21 +53,24 @@ def rates_without_COVID(rates: list[float]) -> list[float]:
     """
 
     rate2020 = average_unemployment_rate(rates)
-    rate2021 = (sum(rates) + rate2020) / (len(rates) + 1)
+    rate2021 = (sum(rates) + rate2020 - rates[0]) / (len(rates))
 
     return [rate2020, rate2021]
 
 
 def predicted_rates(rates: list[float]) -> list[float]:
     """ Return the predicted unemployment rate between 2022 and 2024 based on
-    unemployment rate data between 2017 and 2021.
-
+    past six years' unemployment rate data.
+    >>> rates_2016to2021 = [6.4, 5.5, 5.2, 5.5, 8, 5.6]
+    >>> predicted_rates(rates_2016to2021)
+    [6.03, 5.97, 6.05]
     """
-    rate2022 = sum(rates) / len(rates)
-    rate2023 = (sum(rates) + rate2022) / (len(rates) + 1)
-    rate2024 = (sum(rates) + rate2022 + rate2023) / (len(rates) + 2)
+    rate2022 = float(round((sum(rates) / len(rates)), 2))
+    rate2023 = float(round((sum(rates) + rate2022 - rates[0]) / (len(rates)), 2))
+    rate2024 = float(round((sum(rates) + rate2022 + rate2023 - rates[0] - rates[1]) / (len(rates)), 2))
 
     return [rate2022, rate2023, rate2024]
+
 
 
 # Calculations related to factors that affect unemployment
