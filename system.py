@@ -36,7 +36,9 @@ INDUSTRIES = [
     'Professional, scientific and technical services',
     'Health care and social assistance',
     'Finance, insurance, real estate, rental and leasing',
-    'Public administration'
+    'Public administration',
+    'Forestry, fishing, mining, quarrying, oil and gas',
+    'Agriculture'
 ]
 
 # Classes
@@ -45,7 +47,7 @@ class Rates:
     """A bundle of all the unemployment rates to display for a job industry.
 
     Instance Attributes:
-        - employment_rates: a list of the unemployment rates for this industry, from 2016 to 2021
+        - unemployment_rates: a list of the unemployment rates for this industry, from 2016 to 2021
         - predicted_rates: a list of the predicted unemployment rates for this industry, from 2022 to 2024
         - rates_without_COVID: a list of the unemployment rates if COVID hadn't happened, from 2020 to 2021
 
@@ -61,13 +63,11 @@ class Industry:
 
     Instance Attributes:
         - name: an index that points to a name in the INDUSTRIES list
-        - rates: the unemployment rates (current and future) for this job industry
-        - impact: a score that measures how much this industry was impacted by COVID-19, on a scale of 1-3 (low to high)
+        - rates: the unemployment rates (and related statistics) for this job industry
+        - impact: a score that measures how much this industry was impacted by COVID-19, increasing as impact is larger
 
     Representation Invariants:
         - 0 <= self.name < len(INDUSTRIES)
-        - len(employee_numbers) == 6
-        - impact in {1, 2, 3}
 
     """
     name: int
@@ -76,7 +76,7 @@ class Industry:
 
 
 class JobMarket:
-    """A class that holds all the data related to unemployment rates
+    """A class that holds all the data related to unemployment rates and job industries
      in a country's job market.
 
     Instance Attributes:
@@ -87,7 +87,7 @@ class JobMarket:
         had on them
 
     Representation Invariants:
-        - len(industries) not in sorted_industries_impact
+        - {index < len(industries) for index in sorted_by_impact}
 
     """
     country_name: str
@@ -108,8 +108,8 @@ class JobMarket:
     def get_industry(self, name: str) -> Industry:
         """Return the Industry object corresponding to the name passed in.
 
-        Representation Invariants:
-        - name in INDUSTRIES
+        Preconditions:
+            - name in INDUSTRIES
         """
         index = name_to_int(name)
 
@@ -120,8 +120,8 @@ class JobMarket:
     def get_rates(self, industry_names: list[str]) -> list[list[float]]:
         """Return the unemployment rates (reported and predicted) of the industries selected.
 
-        Representation Invariants:
-        - {name in INDUSTRIES for name in industry_names}
+        Preconditions:
+            - {name in INDUSTRIES for name in industry_names}
         """
         industries = [self.get_industry(industry) for industry in industry_names]
         list_so_far = []
@@ -134,8 +134,8 @@ class JobMarket:
     def get_rates_wt_covid(self, industry_names: list[str]) -> list[list[float]]:
         """Return the unemployment rates (reported and without COVID-19) of the industries selected.
 
-        Representation Invariants:
-        - {name in INDUSTRIES for name in industry_names}
+        Preconditions:
+            - {name in INDUSTRIES for name in industry_names}
         """
         industries = [self.get_industry(industry) for industry in industry_names]
         list_so_far = []
@@ -149,9 +149,9 @@ class JobMarket:
     def rates_in_range(self, industry_names: list[str], years: list[int]) -> list[list[float]]:
         """Return the unemployment rates (reported and predicted) of the industries over the years selected.
 
-        Representation invariants:
-        - {year <= 2024 for year in years}
-        - {name in INDUSTRIES for name in industry_names}
+        Preconditions:
+            - {2016 <= year <= 2024 for year in years}
+            - {name in INDUSTRIES for name in industry_names}
         """
         industries = [self.get_industry(industry) for industry in industry_names]
         list_so_far = []
@@ -171,11 +171,15 @@ class JobMarket:
         return self.rates.unemployment_rates + self.rates.predicted_rates
 
     def get_national_rates_wt_covid(self) -> list[float]:
-        """Return the country's (reported and without COVID-19)unemployment rates."""
+        """Return the country's (reported and without COVID-19) unemployment rates.
+        """
         return [self.rates.unemployment_rates[i] for i in range(0, 4)] + self.rates.rates_without_COVID
 
     def national_rates_in_range(self, years: list[int]) -> list[float]:
-        """ Return the unemployment rates (reported and predicted) of the country over the years selected.
+        """Return the unemployment rates (reported and predicted) of the country over the years selected.
+
+        Preconditions:
+            - {2016 <= year <= 2024 for year in years}
         """
         rates = [self.rates.unemployment_rates[i] for i in range(0, len(years))]
         if len(years) > len(self.rates.unemployment_rates):
@@ -197,7 +201,7 @@ class JobMarket:
 
     def impacted_industries_group(self, group: int) -> list[list[float]]:
         """Return the industries in a specific impact group. The impact value of an industry
-         can be 1, 2, or 3, increasing the more COVID-19 had an impact on unemployment rate.
+         increases the more COVID-19 had an impact on unemployment rate.
         """
         group_so_far = []
         entered = False
@@ -213,8 +217,12 @@ class JobMarket:
             elif entered:
                 return group_so_far
 
-    def top_ur(self, year: int, amount: int) -> list[list[float]]:
+    def top_urs(self, year: int, amount: int) -> list[list[float]]:
         """"Return # (based on amount sent in) industries with the highest unemployment rates in the year mentioned.
+
+        Preconditions:
+            - year in [2016, 2017, 2018, 2019, 2020, 2021]
+            - amount < len(self.industries)
         """
         top_ur_so_far = []
         index = year_to_index(year)
@@ -239,7 +247,7 @@ def year_to_index(year: int) -> int:
      to the total number of workers in 2017.
 
      Preconditions:
-     - year in [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+        - year in [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
 
      >>> year_to_index(2017)
      1
@@ -256,7 +264,10 @@ def int_to_name(index: int) -> str:
     and the list of industry names in INDUSTRIES.
 
     Preconditions:
-    - 0 <= self.name < len(INDUSTRIES)
+        - 0 <= self.name < len(INDUSTRIES)
+
+    >>> int_to_name(1)
+    Information, culture and recreation
     """
     return INDUSTRIES[index]
 
@@ -264,8 +275,11 @@ def int_to_name(index: int) -> str:
 def name_to_int(name: str) -> int:
     """ Return the index of this industry in INDUSTRIES using the name passed in.
 
-        Preconditions:
+    Preconditions:
         - name in INDUSTRIES
+
+    >>> name_to_int('Information, culture and recreation')
+    1
     """
     for i in range(0, len(INDUSTRIES)):
         if name == INDUSTRIES[i]:

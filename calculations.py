@@ -3,11 +3,10 @@
 Description
 ===============================
 The calculations file reads and transforms data from the dataset, forming a complete list of Industry objects.
-It computes all the rates and potential scores seen in the Industry dataclass.
+It computes all the rates seen in the Industry dataclass.
 
 Short-forms:
 ur = unemployment rate
-rwps = remote work potential score
 ci = covid-19 impact
 
 Copyright and Usage Information
@@ -27,13 +26,12 @@ import system
 from system import JobMarket
 import numpy as np
 
-# Global variables -- NOT THE BEST PRACTICE, SOMEHOW FIND BETTER WAY
-# A JobMarket object that holds the results of all of our computations
-CANADA = JobMarket('Canada', system.Rates([], [], []), [])
-
 # Unmployment rate calculations
 def average_unemployment_rate(rates: list[float]) -> float:
     """ Return the average unemployment rate based on a list of rates.
+
+    >>> average_unemployment_rate([6.2, 2.3, 7.7, 3.8])
+    5.0
     """
     return sum(rates) / len(rates)
 
@@ -52,6 +50,7 @@ def rates_without_COVID(rates: list[float]) -> list[float]:
 def predicted_rates(rates: list[float]) -> list[float]:
     """ Return the predicted unemployment rate between 2022 and 2024 based on
     past six years' unemployment rate data.
+
     >>> rates_2016to2021 = [6.4, 5.5, 5.2, 5.5, 8, 5.6]
     >>> predicted_rates(rates_2016to2021)
     [6.03, 5.97, 6.05]
@@ -63,46 +62,34 @@ def predicted_rates(rates: list[float]) -> list[float]:
     return [rate2022, rate2023, rate2024]
 
 
-
 # Calculations related to factors that affect unemployment
 def calculate_ci(rates: list[float]) -> int:
-    """
-    f
-    """
-    avg_ur_before = (rates[0] + rates[1] + rates[2]) // 3
-    avg_ur_after = (rates[3] + rates[4]) // 2
+    """ Calculate the impact of COVID-19 on a job industry. Impact values increase as impact does.
 
+    Preconditions:
+        - len(rates) == 6
+
+    >>> calculate_ci([5.4, 4.9, 5.1, 4.6, 8, 5.6])
+    2
+    """
+    avg_ur_before = (rates[0] + rates[1] + rates[2] + rates[3]) / 4
+    avg_ur_after = (rates[4] + rates[5]) / 2
     ur_difference = abs(avg_ur_after - avg_ur_before)
 
-    if ur_difference < 0.5:
-        return 1
-    elif ur_difference < 1.0:
-        return 2
+    impact = 1
+    difference = 1
 
-    return 3
+    while ur_difference > difference:
+        impact = impact + 1
+        difference = difference + 1.5
 
-
-def calculate_rwps(name: str) -> int:
-    """
-    d - FIX SCORING
-    """
-    index = system.name_to_int(name)
-    data = system.SUCCESS_FACTORS[index]
-
-    score = sum([data[i] for i in range(0, 4)]) // 4
-
-    if data[4]:
-        if data[5]:
-            return score
-        else:
-            return (score + 100) // 2
-    else:
-        return score
+    return impact
 
 
 # Reading from datasets
 def read_data() -> JobMarket:
-    """"""
+    """Read the data in both of our data sets and store in a JobMarket object.
+    """
     country_data = read_national_data()
     industries = read_industry_data()
     return JobMarket('Canada', country_data, industries)
@@ -120,7 +107,7 @@ def read_national_data() -> system.Rates:
     return national_data
 
 
-def read_industry_data() -> list[list]:
+def read_industry_data() -> list[system.Industry]:
     """Return the data stored in the given file.
     The file is a CSV file with seven columns, one columns gives industries while the other six give the number of
     employment between 2016 and 2021. These files are based on real data from the Canadian Government.
@@ -136,7 +123,25 @@ def read_industry_data() -> list[list]:
 
     for i in range(len(data)):
         rates = [data[i][1], data[i][2], data[i][3], data[i][4], data[i][5], data[i][6]]
-        data[i][0] = Rates(unemployment_rates=rates, predicted_rates=predicted_rates(rates),
+        data[i][0] = system.Rates(unemployment_rates=rates, predicted_rates=predicted_rates(rates),
                            rates_without_COVID=rates_without_COVID(rates))
 
     return [data[i] for i in range(len(data))]
+
+
+if __name__ == '__main__':
+    import doctest
+
+    doctest.testmod()
+
+    import python_ta
+    import python_ta.contracts
+
+    python_ta.contracts.DEBUG_CONTRACTS = False
+    python_ta.contracts.check_all_contracts()
+
+    python_ta.check_all(config={
+        'extra-imports': ['python_ta.contracts', 'dataclasses'],
+        'max-line-length': 100,
+        'disable': ['R1705', 'C0200'],
+    })

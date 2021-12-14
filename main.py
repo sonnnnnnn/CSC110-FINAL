@@ -20,54 +20,58 @@ import plotly
 
 
 def get_plot_unemployment(data: JobMarket, labels: list, name: str) -> None:
-    """ Plots a line graph and Bar Chart showing  the data given. Graph should be outputted in browser
-        User is able to toggle between a line graph and a bar chart.
-         """
+    """Plots a line graph and Bar Chart showing the data given. Graph should be outputted in browser.
+    User is able to toggle between a line graph and a bar chart.
+    """
     data1 = INDUSTRIES
     data2 = data.rates_in_range(INDUSTRIES, [2016, 2017, 2018, 2019, 2021])
     dataframe = pd.DataFrame(data1)
     dataframe = dataframe.assign(rate=data2)
     plot = pe.line(dataframe, x=labels[0], y=labels[1], title=name, markers=True)
-    # updates the layout of the graph to include  menu to toggle between graphs
+
+    # Updates the layout of the graph to include  menu to toggle between graphs
     plot.update_layout(updatemenus=[dict(buttons=list([dict(args=["type", "bar"], label="Bar Chart", method="restyle"),
                                                        dict(args=["type", "line"], label="Line Graph",
                                                             method="restyle")]), direction="right", ), ])
-    # outputs the plot
+    # Outputs the plot
     plot.show()
 
 
 def get_plot_comparison(data: JobMarket) -> None:
-    """Plots a comparison graph showing the current unemployment rates and the unemployment rates without COVID-19 .
-     Graph should be outputted in browser"
+    """Plots a comparison graph showing the current unemployment rates and the unemployment rates without COVID-19.
+     Graph should be outputted in browser.
 
-     Comparison graph shows both a line graph and a bar chart. trace0 is the current unemployment rates while Trace1
-     are the unemployment rates without COVID-19"
+     Comparison graph shows both a line graph and a bar chart. Trace0 is the current unemployment rates while Trace1
+     are the unemployment rates without COVID-19.
     """
     graph = plotly.graph_objects.Figure()
-    # adds the line graph
+    # Adds the line graph
     graph.add_trace(plotly.graph_objects.Scatter(x=INDUSTRIES, y=data.rates_in_range(INDUSTRIES,
                                                                                      [2016, 2017, 2018, 2019, 2021]), name="COVID-19"))
-    # adds bar chart
+    # Adds bar chart
     graph.add_trace(plotly.graph_objects.Bar(x=data.industries, y=data.get_rates_wt_covid(INDUSTRIES),
                                              name="Without COVID-19"))
 
-    # outputs graph
+    # Outputs graph
     graph.show()
 
 
 def get_plot_prediction(data: JobMarket) -> None:
-    """Plots a  graph showing the predicted unemployment for each industry .
-         Graph should be outputted in browser"
-        """
+    """Plots a graph showing the predicted unemployment for each industry. Graph should be outputted in browser.
+    """
     data1 = INDUSTRIES
     data2 = data.get_rates(INDUSTRIES)
     dataframe = pd.DataFrame(data1)
     dataframe = dataframe.assign(rate=data2)
     plot = pe.line(dataframe, x=0, y="rate", title="Predicted Unemployment 2022 -2024", markers=True)
-    # outputs the plot
+
+    # Outputs the plot
     plot.show()
 
 
 if __name__ == '__main__':
     job_market = calculations.read_data()
 
+    #get_plot_unemployment(job_market, [INDUSTRIES, []], "Unemployment rates of Canadian job industries")
+    get_plot_comparison(job_market)
+    get_plot_prediction(job_market)
