@@ -138,10 +138,15 @@ def read_industry_data(filename: str) -> list[helpers.Industry]:
 
         # Skip header row
         next(reader)
-        data = [row for row in reader if len(row) == 2]  # Length of each row is 2 ; Skips last row
+        data = [row for row in reader if len(row) == 7]  # Length of each row is 7 ; Skips last row
         # for row in data:
         # data_output += [Unemployment(row[0], float(row[1]))]
         for row in data:
             row[1] = float(row[1])
+            row[2] = float(row[2])
+            row[3] = float(row[3])
+            row[4] = float(row[4])
+            row[5] = float(row[5])
+            row[6] = float(row[6])
     #return data
     return []
