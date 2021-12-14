@@ -190,6 +190,11 @@ class JobMarket:
 
         return rates
 
+    def get_max_impact_group(self) -> int:
+        """Get the max. impact that COVID-19 has had on a job industry.
+        """
+        return max(self.impact_groups)
+
     def sort_industries_by_impact(self) -> None:
         """Sort the industries by the impact COVID-19 had on them.
         """
