@@ -30,20 +30,16 @@ from dataclasses import dataclass
 INDUSTRIES = [
     'Accommodation and food services',
     'Information, culture and recreation',
-    'Forestry, fishing, mining, quarrying, oil and gas',
-    'Business, building and other support services',
     'Construction',
     'Other services (except public administration)',
     'Transportation and warehousing',
     'Wholesale and retail trade',
     'Manufacturing',
     'Educational services',
-    'Agriculture',
     'Professional, scientific and technical services',
     'Health care and social assistance',
     'Finance, insurance, real estate, rental and leasing',
-    'Public administration',
-    'Utilities'
+    'Public administration'
 ]
 
 # Our own small set of values related to factors that affect a job industry's success during COVID-19
