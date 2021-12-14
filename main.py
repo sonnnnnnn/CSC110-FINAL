@@ -24,7 +24,7 @@ def get_plot_unemployment(data: JobMarket, labels: list, name: str) -> None:
         User is able to toggle between a line graph and a bar chart.
          """
     data1 = INDUSTRIES
-    data2 = data.rates.unemployment_rates
+    data2 = data.rates_in_range(INDUSTRIES, [2016, 2017, 2018, 2019, 2021])
     dataframe = pd.DataFrame(data1)
     dataframe = dataframe.assign(rate=data2)
     plot = pe.line(dataframe, x=labels[0], y=labels[1], title=name, markers=True)
@@ -45,9 +45,10 @@ def get_plot_comparison(data: JobMarket) -> None:
     """
     graph = plotly.graph_objects.Figure()
     # adds the line graph
-    graph.add_trace(plotly.graph_objects.Scatter(x=INDUSTRIES, y=data.rates.unemployment_rates, name="COVID-19"))
+    graph.add_trace(plotly.graph_objects.Scatter(x=INDUSTRIES, y=data.rates_in_range(INDUSTRIES,
+                                                                                     [2016, 2017, 2018, 2019, 2021]), name="COVID-19"))
     # adds bar chart
-    graph.add_trace(plotly.graph_objects.Bar(x=data.industries, y=data.rates.rates_without_COVID,
+    graph.add_trace(plotly.graph_objects.Bar(x=data.industries, y=data.get_rates_wt_covid(INDUSTRIES),
                                              name="Without COVID-19"))
 
     # outputs graph
@@ -59,7 +60,7 @@ def get_plot_prediction(data: JobMarket) -> None:
          Graph should be outputted in browser"
         """
     data1 = INDUSTRIES
-    data2 = data.rates.predicted_rates
+    data2 = data.get_rates(INDUSTRIES)
     dataframe = pd.DataFrame(data1)
     dataframe = dataframe.assign(rate=data2)
     plot = pe.line(dataframe, x=0, y="rate", title="Predicted Unemployment 2022 -2024", markers=True)
@@ -67,13 +68,6 @@ def get_plot_prediction(data: JobMarket) -> None:
     plot.show()
 
 
-def run_example(data: JobMarket, lables: list, name: str) -> None:
-    """ Runs all three graphs from above.
-    """
-    get_plot_unemployment(data, lables, name)
-    get_plot_prediction(data)
-    get_plot_comparison(data)
-
-
 if __name__ == '__main__':
     job_market = calculations.read_data()
+
