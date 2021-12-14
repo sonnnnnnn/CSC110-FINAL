@@ -2,8 +2,8 @@
 
 Description
 ===============================
-The calculations file reads and transforms data from the dataset, forming a complete list of Industry objects.
-It computes all the rates seen in the Industry dataclass.
+The calculations file reads and transforms data from the dataset, forming a complete list of Industry objects,
+all of which is stored in a JobMarket object.
 
 Short-forms:
 ur = unemployment rate
@@ -11,11 +11,10 @@ ci = covid-19 impact
 
 Copyright and Usage Information
 ===============================
-
 This file is provided solely for the use of TAs
 marking CSC110 projects at the University of Toronto St. George campus. All forms of
 distribution of this code, whether as given or with any changes, are
-expressly prohibited. For more information on copyright for CSC110 materials,
+expressly prohibited. For more information on copyright for these materials,
 please consult us at our email addresses.
 
 This file is Copyright (c) 2021 Juhwan Son, Defne Altiok, Aliyah James, and Rohma Daud.
@@ -24,9 +23,10 @@ This file is Copyright (c) 2021 Juhwan Son, Defne Altiok, Aliyah James, and Rohm
 import csv
 import system
 from system import JobMarket
-import numpy as np
 
 # Unmployment rate calculations
+
+
 def average_unemployment_rate(rates: list[float]) -> float:
     """ Return the average unemployment rate based on a list of rates.
 
@@ -36,7 +36,7 @@ def average_unemployment_rate(rates: list[float]) -> float:
     return sum(rates) / len(rates)
 
 
-def rates_without_COVID(rates: list[float]) -> list[float]:
+def rates_without_covid(rates: list[float]) -> list[float]:
     """ Return the predicted unemployment rate in 2020 and 2021 based on unemployment rate before COVID-19
     using arithmetic mean method.
     """
@@ -91,8 +91,9 @@ def read_data() -> JobMarket:
     """Read the data in both of our data sets and store in a JobMarket object.
     """
     country_data = read_national_data()
-    industries = read_industry_data()
-    return JobMarket('Canada', country_data, industries)
+    data = read_industry_data('data/unemployment_industry.csv')
+    industries = save_industry_data(data)
+    return JobMarket('Canada', country_data, industries[0], industries[1])
 
 
 def read_national_data() -> system.Rates:
@@ -103,30 +104,43 @@ def read_national_data() -> system.Rates:
 
     rates = [6.4, 5.5, 5.2, 5.5, 8, 5.6]
     national_data = system.Rates(unemployment_rates=rates, predicted_rates=predicted_rates(rates),
-                                 rates_without_COVID=rates_without_COVID(rates))
+                                 rates_without_COVID=rates_without_covid(rates))
     return national_data
 
 
-def read_industry_data() -> list[system.Industry]:
+def read_industry_data(filename: str) -> list[list]:
     """Return the data stored in the given file.
     The file is a CSV file with seven columns, one columns gives industries while the other six give the number of
-    employment between 2016 and 2021. These files are based on real data from the Canadian Government.
+    employment between 2016 and 2021. These files are based on real data from the province of British Columbia.
     """
 
-    unemployment_csv = csv.reader(open("unemployment_industry.csv"))
-    header = unemployment_csv.next()
-    data = []
-    for row in unemployment_csv:
-        data.append(row)
+    with open(filename) as file:
+        reader = csv.reader(file)
+        # Skip header rows
+        next(reader)
+        next(reader)
+        data = list(reader)
 
-    data = np.array(data)
+        for row in data:
+            for num in range(1, len(row)):
+                row[num] = float(row[num])
+    return data
 
-    for i in range(len(data)):
-        rates = [data[i][1], data[i][2], data[i][3], data[i][4], data[i][5], data[i][6]]
-        data[i][0] = system.Rates(unemployment_rates=rates, predicted_rates=predicted_rates(rates),
-                           rates_without_COVID=rates_without_COVID(rates))
 
-    return [data[i] for i in range(len(data))]
+def save_industry_data(data: list[list]) -> list[[list[system.Industry], list[int]]]:
+    """Saves data as an Industry class"""
+    impacts = []
+    outputs_so_far = []
+    for row in data:
+        name = system.name_to_int(row[0])
+        rates = [row[1], row[2], row[3], row[4], row[5], row[6]]
+        rates_data = system.Rates(unemployment_rates=rates, predicted_rates=predicted_rates(rates),
+                                  rates_without_COVID=rates_without_covid(rates))
+        impact1 = calculate_ci(rates)
+        impacts.append(impact1)
+        outputs_so_far += [system.Industry(name, rates_data, impact1)]
+
+    return [outputs_so_far, impacts]
 
 
 if __name__ == '__main__':
@@ -141,7 +155,7 @@ if __name__ == '__main__':
     python_ta.contracts.check_all_contracts()
 
     python_ta.check_all(config={
-        'extra-imports': ['python_ta.contracts', 'dataclasses'],
+        'allowed-io': ['read_industry_data'],
         'max-line-length': 100,
         'disable': ['R1705', 'C0200'],
     })

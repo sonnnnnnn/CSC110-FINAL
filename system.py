@@ -11,11 +11,10 @@ ci = covid-19 impact
 
 Copyright and Usage Information
 ===============================
-
 This file is provided solely for the use of TAs
 marking CSC110 projects at the University of Toronto St. George campus. All forms of
 distribution of this code, whether as given or with any changes, are
-expressly prohibited. For more information on copyright for CSC110 materials,
+expressly prohibited. For more information on copyright for these materials,
 please consult us at our email addresses.
 
 This file is Copyright (c) 2021 Juhwan Son, Defne Altiok, Aliyah James, and Rohma Daud.
@@ -23,7 +22,7 @@ This file is Copyright (c) 2021 Juhwan Son, Defne Altiok, Aliyah James, and Rohm
 from dataclasses import dataclass
 
 # Global variables
-# Names of all Canadian industries we'll be tracking
+# Names of all Canadian job industries we'll be tracking
 INDUSTRIES = [
     'Accommodation and food services',
     'Information, culture and recreation',
@@ -49,8 +48,7 @@ class Rates:
     Instance Attributes:
         - unemployment_rates: a list of the unemployment rates for this industry, from 2016 to 2021
         - predicted_rates: a list of the predicted unemployment rates for this industry, from 2022 to 2024
-        - rates_without_COVID: a list of the unemployment rates if COVID hadn't happened, from 2020 to 2021
-
+        - rates_without_COVID: a list of the unemployment rates if COVID-19 hadn't happened, from 2020 to 2021
     """
     unemployment_rates: list[float]
     predicted_rates: list[float]
@@ -59,12 +57,13 @@ class Rates:
 
 @dataclass
 class Industry:
-    """A job industry in the Canadian job market.
+    """A class that represents a job industry in the Canadian job market.
 
     Instance Attributes:
         - name: an index that points to a name in the INDUSTRIES list
         - rates: the unemployment rates (and related statistics) for this job industry
-        - impact: a score that measures how much this industry was impacted by COVID-19, increasing as impact is larger
+        - impact: a score that measures how much this industry was impacted by COVID-19, increasing as the impact
+         is larger
 
     Representation Invariants:
         - 0 <= self.name < len(INDUSTRIES)
@@ -81,13 +80,16 @@ class JobMarket:
 
     Instance Attributes:
         - country_name: the  name of the country whose job market this is
-        - rates: the unemployment rates (current and future) for the country
+        - rates: the unemployment rates (and related statistics) for the country
         - industries: a list of all the job industries in this country
         - sorted_by_impact: a list of indexes that point to objects in industries, sorted by the impact COVID-19
         had on them
+        - impact_groups: a list of the impacts COVID-19 had on every job industry
 
     Representation Invariants:
         - {index < len(industries) for index in sorted_by_impact}
+        - len(sorted_by_impact) == len(industries)
+        - {industries[i].impact in impact_groups for index in sorted_by_impact}
 
     """
     country_name: str
@@ -97,11 +99,9 @@ class JobMarket:
     impact_groups: set[int]
 
     def __init__(self, name: str, rates: Rates, industries: list[Industry], impact_groups: set[int]) -> None:
-        """Initialize a new country's job market/unemployment statistics object
-        with the name of the country.
+        """Initialize a new country's job market object.
         """
         self.country_name = name
-
         self.rates = rates
         self.industries = industries
         self.impact_groups = impact_groups
@@ -160,9 +160,11 @@ class JobMarket:
 
         for industry in industries:
             temp_list = [industry.rates.unemployment_rates[i] for i in range(0, len(years))]
+
             if len(years) > len(industry.rates.unemployment_rates):
                 temp_list.extend([industry.rates.predicted_rates[i] for i in range(0, len(years) - len(
                     industry.rates.unemployment_rates))])
+
             list_so_far.append(temp_list)
 
         return list_so_far
@@ -184,6 +186,7 @@ class JobMarket:
             - {2016 <= year <= 2024 for year in years}
         """
         rates = [self.rates.unemployment_rates[i] for i in range(0, len(years))]
+
         if len(years) > len(self.rates.unemployment_rates):
             rates.extend([self.rates.predicted_rates[i] for i in range(0, len(years) -
                                                                        len(self.rates.unemployment_rates))])
@@ -200,10 +203,12 @@ class JobMarket:
         """
         for i in range(0, len(self.industries)):
             max = i
+
             for j in range(0, len(self.industries)):
                 if self.industries[j].impact > self.industries[max].impact\
                         and j not in self.sorted_by_impact:
                     max = j
+
             self.sorted_by_impact.append(max)
 
     def group_industries_by_impact(self, group: int) -> list[list[float]]:
@@ -236,10 +241,12 @@ class JobMarket:
 
         for i in range(0, amount):
             max = i
+
             for j in range(0, len(self.industries)):
                 if self.industries[j].rates.unemployment_rates[index] > \
                         self.industries[i].rates.unemployment_rates[index] and j not in top_ur_so_far:
                     max = j
+
             top_ur_so_far.append(max)
 
         return [self.industries[index].rates.unemployment_rates + self.industries[index].rates.predicted_rates
@@ -295,6 +302,7 @@ def name_to_int(name: str) -> int:
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()
 
     import python_ta
@@ -304,7 +312,6 @@ if __name__ == '__main__':
     python_ta.contracts.check_all_contracts()
 
     python_ta.check_all(config={
-        'extra-imports': ['python_ta.contracts', 'dataclasses'],
         'max-line-length': 100,
         'disable': ['R1705', 'C0200'],
     })
