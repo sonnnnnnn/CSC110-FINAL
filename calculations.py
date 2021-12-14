@@ -97,7 +97,7 @@ def calculate_recovery_potential() -> int:
 
 
 # Reading from datasets
-def read_data(filenames: list) -> JobMarket:
+def read_data() -> JobMarket:
     """"""
     country_data = read_national_data(filenames[0])
     industries = read_industry_data(filenames[1])
@@ -111,7 +111,7 @@ def read_national_data(filename: str) -> helpers.Rates:
     """
     # ACCUMULATOR data_output: The Unemployment parsed from file so far
     data_output = []
-    with open(filename) as file:
+    with open('unemployment_rate.csv') as file:
         reader = csv.reader(file)
 
         # Skip header row
@@ -125,7 +125,7 @@ def read_national_data(filename: str) -> helpers.Rates:
     return helpers.Rates([], [], [])
 
 
-def read_industry_data(filename: str) -> list[helpers.Industry]:
+def read_industry_data() -> list[helpers.Industry]:
     """Return the data stored in the given file.
 
     The file is a CSV file with two columns, one columns gives the month and year while the other gives the unemployment
@@ -133,7 +133,7 @@ def read_industry_data(filename: str) -> list[helpers.Industry]:
     """
     # ACCUMULATOR data_output: The Unemployment parsed from file so far
     data_output = []
-    with open(filename) as file:
+    with open('unemployment_industry.csv') as file:
         reader = csv.reader(file)
 
         # Skip header row
