@@ -47,9 +47,6 @@ def average_unemployment_rate(rates: list[float]) -> float:
 def rates_without_COVID(rates: list[float]) -> list[float]:
     """ Return the predicted unemployment rate in 2020 and 2021 based on unemployment rate before COVID-19
     using arithmetic mean method.
-
-    Preconditions:
-        - len(rates) >= 1
     """
 
     rate2020 = average_unemployment_rate(rates)
