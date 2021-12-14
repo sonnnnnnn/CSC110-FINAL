@@ -39,7 +39,9 @@ INDUSTRIES = [
     'Professional, scientific and technical services',
     'Health care and social assistance',
     'Finance, insurance, real estate, rental and leasing',
-    'Public administration'
+    'Public administration',
+    'Agriculture', 
+    'Forestry, fishing, mining, quarrying, oil and gas'
 ]
 
 # Our own small set of values related to factors that affect a job industry's success during COVID-19
