@@ -34,12 +34,6 @@ CANADA = JobMarket('Canada', system.Rates([], [], []), [])
 # Unmployment rate calculations
 def average_unemployment_rate(rates: list[float]) -> float:
     """ Return the average unemployment rate based on a list of rates.
-
-    Preconditions:
-        - {type(rate) == type(0.4) for rate in rates}
-
-     >>> average_unemployment_rate()
-
     """
     return sum(rates) / len(rates)
 
