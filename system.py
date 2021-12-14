@@ -190,7 +190,7 @@ class JobMarket:
 
         return rates
 
-    def sort_impacted_industries(self) -> None:
+    def sort_industries_by_impact(self) -> None:
         """Sort the industries by the impact COVID-19 had on them.
         """
         for i in range(0, len(self.industries)):
@@ -201,15 +201,15 @@ class JobMarket:
                     max = j
             self.sorted_by_impact.append(max)
 
-    def impacted_industries_group(self, group: int) -> list[list[float]]:
-        """Return the industries in a specific impact group. The impact value of an industry
+    def group_industries_by_impact(self, group: int) -> list[list[float]]:
+        """Return all the industries in a specific impact group. The impact value of an industry
          increases the more COVID-19 had an impact on unemployment rate.
         """
         group_so_far = []
         entered = False
 
         if self.sorted_by_impact == []:
-            self.sort_impacted_industries()
+            self.sort_industries_by_impact()
 
         for index in self.sorted_by_impact:
             if self.industries[index] == group:
